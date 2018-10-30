@@ -47,6 +47,12 @@ variable "vpc_id" {
   default     = ""
 }
 
+variable "subnet_ids" {
+  type        = "list"
+  description = "The list of subnet IDs in which to setup our Consul cluster."
+  default     = []
+}
+
 variable "spot_price" {
   description = "The maximum hourly price to pay for EC2 Spot Instances."
   default     = ""

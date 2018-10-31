@@ -35,7 +35,7 @@ module "consul_servers" {
   user_data = "${data.template_file.user_data_server.rendered}"
 
   vpc_id     = "${data.aws_vpc.default.id}"
-  subnet_ids = "${data.aws_subnet_ids.default.ids}"
+  subnet_ids = "${var.subnet_ids}"
 
   # To make testing easier, we allow Consul and SSH requests from any IP address here but in a production
   # deployment, we strongly recommend you limit this to the IP address ranges of known, trusted servers inside your VPC.
@@ -62,14 +62,14 @@ data "template_file" "user_data_server" {
   template = "${file("${path.module}/user-data-server.sh")}"
 
   vars {
-    cluster_tag_key   = "${var.cluster_tag_key}"
-    cluster_tag_value = "${var.cluster_name}"
+    cluster_tag_key          = "${var.cluster_tag_key}"
+    cluster_tag_value        = "${var.cluster_name}"
     enable_gossip_encryption = "${var.enable_gossip_encryption}"
-    gossip_encryption_key = "${var.gossip_encryption_key}"
-    enable_rpc_encryption = "${var.enable_rpc_encryption}"
-    ca_path = "${var.ca_path}"
-    cert_file_path = "${var.cert_file_path}"
-    key_file_path = "${var.key_file_path}"
+    gossip_encryption_key    = "${var.gossip_encryption_key}"
+    enable_rpc_encryption    = "${var.enable_rpc_encryption}"
+    ca_path                  = "${var.ca_path}"
+    cert_file_path           = "${var.cert_file_path}"
+    key_file_path            = "${var.key_file_path}"
   }
 }
 
@@ -98,7 +98,7 @@ module "consul_clients" {
   user_data = "${data.template_file.user_data_client.rendered}"
 
   vpc_id     = "${data.aws_vpc.default.id}"
-  subnet_ids = "${data.aws_subnet_ids.default.ids}"
+  subnet_ids = "${var.subnet_ids}"
 
   # To make testing easier, we allow Consul and SSH requests from any IP address here but in a production
   # deployment, we strongly recommend you limit this to the IP address ranges of known, trusted servers inside your VPC.
@@ -117,14 +117,14 @@ data "template_file" "user_data_client" {
   template = "${file("${path.module}/user-data-client.sh")}"
 
   vars {
-    cluster_tag_key   = "${var.cluster_tag_key}"
-    cluster_tag_value = "${var.cluster_name}"
+    cluster_tag_key          = "${var.cluster_tag_key}"
+    cluster_tag_value        = "${var.cluster_name}"
     enable_gossip_encryption = "${var.enable_gossip_encryption}"
-    gossip_encryption_key = "${var.gossip_encryption_key}"
-    enable_rpc_encryption = "${var.enable_rpc_encryption}"
-    ca_path = "${var.ca_path}"
-    cert_file_path = "${var.cert_file_path}"
-    key_file_path = "${var.key_file_path}"
+    gossip_encryption_key    = "${var.gossip_encryption_key}"
+    enable_rpc_encryption    = "${var.enable_rpc_encryption}"
+    ca_path                  = "${var.ca_path}"
+    cert_file_path           = "${var.cert_file_path}"
+    key_file_path            = "${var.key_file_path}"
   }
 }
 
@@ -137,10 +137,6 @@ data "template_file" "user_data_client" {
 data "aws_vpc" "default" {
   default = "${var.vpc_id == "" ? true : false}"
   id      = "${var.vpc_id}"
-}
-
-data "aws_subnet_ids" "default" {
-  vpc_id = "${data.aws_vpc.default.id}"
 }
 
 data "aws_region" "current" {}

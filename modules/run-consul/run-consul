@@ -306,6 +306,9 @@ EOF
   $gossip_encryption_configuration
   $rpc_encryption_configuration
   $autopilot_configuration
+  "acl_datacenter": "$datacenter",
+  "acl_default_policy": "deny",
+  "acl_down_policy": "extend-cache",
   "ui": $ui
 }
 EOF

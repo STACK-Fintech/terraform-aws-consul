@@ -278,7 +278,12 @@ EOF
   local gossip_encryption_configuration=""
   if [[ "$enable_gossip_encryption" == "true" && ! -z "$gossip_encryption_key" ]]; then
     log_info "Creating gossip encryption configuration"
-    gossip_encryption_configuration="\"encrypt\": \"$gossip_encryption_key\","
+    gossip_encryption_configuration=$(cat <<EOF
+"encrypt": "$gossip_encryption_key",
+"encrypt_verify_incoming": true,
+"encrypt_verify_outgoing": true,
+EOF
+)
   fi
 
   local rpc_encryption_configuration=""
@@ -312,7 +317,7 @@ EOF
   $rpc_encryption_configuration
   $autopilot_configuration
   "acl": {
-    "enabled": "true",
+    "enabled": true,
     "default_policy": "deny",
     "down_policy": "extend-cache",
     "tokens": {
@@ -339,7 +344,7 @@ else
   $rpc_encryption_configuration
   $autopilot_configuration
   "acl": {
-    "enabled": "true",
+    "enabled": true,
     "default_policy": "deny",
     "down_policy": "extend-cache"
   },

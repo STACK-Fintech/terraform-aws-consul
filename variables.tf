@@ -13,7 +13,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 
 variable "ami_id" {
-  description = "The ID of the AMI to run in the cluster. This should be an AMI built from the Packer template under examples/consul-ami/consul.json. To keep this example simple, we run the same AMI on both server and client nodes, but in real-world usage, your client nodes would also run your apps. If the default value is used, Terraform will look up the latest AMI build automatically."
+  description = "The ID of the AMI to run in the cluster. This should be an AMI built from the Packer template under examples/example-with-encryption/packer/consul-with-certs.json. To keep this example simple, we run the same AMI on both server and client nodes, but in real-world usage, your client nodes would also run your apps. If the default value is used, Terraform will look up the latest AMI build automatically."
   default     = ""
 }
 
@@ -29,7 +29,7 @@ variable "num_servers" {
 
 variable "num_clients" {
   description = "The number of Consul client nodes to deploy. You typically run the Consul client alongside your apps, so set this value to however many Instances make sense for your app code."
-  default     = 6
+  default     = 3
 }
 
 variable "cluster_tag_key" {
@@ -48,12 +48,41 @@ variable "vpc_id" {
 }
 
 variable "subnet_ids" {
-  type        = "list"
-  description = "The list of subnet IDs in which to setup our Consul cluster."
+  description = "The list of subnets to use for the deployment"
   default     = []
 }
 
 variable "spot_price" {
   description = "The maximum hourly price to pay for EC2 Spot Instances."
   default     = ""
+}
+
+variable "enable_gossip_encryption" {
+  description = "Encrypt gossip traffic between nodes. Must also specify encryption key."
+  default     = "true"
+}
+
+variable "enable_rpc_encryption" {
+  description = "Encrypt RPC traffic between nodes. Must also specify TLS certificates and keys."
+  default     = "true"
+}
+
+variable "gossip_encryption_key" {
+  description = "16 byte cryptographic key to encrypt gossip traffic between nodes. Must set 'enable_gossip_encryption' to true for this to take effect. WARNING: Setting the encryption key here means it will be stored in plain text. We're doing this here to keep the example simple, but in production you should inject it more securely, e.g. retrieving it from KMS."
+  default     = ""
+}
+
+variable "ca_path" {
+  description = "Path to the directory of CA files used to verify outgoing connections."
+  default     = "/opt/consul/tls/ca"
+}
+
+variable "cert_file_path" {
+  description = "Path to the certificate file used to verify incoming connections."
+  default     = "/opt/consul/tls/consul.crt.pem"
+}
+
+variable "key_file_path" {
+  description = "Path to the certificate key used to verify incoming connections."
+  default     = "/opt/consul/tls/consul.key.pem"
 }

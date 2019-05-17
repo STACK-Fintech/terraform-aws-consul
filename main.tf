@@ -3,49 +3,13 @@
 # These templates show an example of how to use the consul-cluster module to deploy Consul in AWS. We deploy two Auto
 # Scaling Groups (ASGs): one with a small number of Consul server nodes and one with a larger number of Consul client
 # nodes. Note that these templates assume that the AMI you provide via the ami_id input variable is built from
-# the examples/consul-ami/consul.json Packer template.
+# the examples/example-with-encryption/packer/consul-with-certs.json Packer template.
 # ---------------------------------------------------------------------------------------------------------------------
 
 # Terraform 0.9.5 suffered from https://github.com/hashicorp/terraform/issues/14399, which causes this template the
 # conditionals in this template to fail.
 terraform {
   required_version = ">= 0.9.3, != 0.9.5"
-}
-
-# ---------------------------------------------------------------------------------------------------------------------
-# AUTOMATICALLY LOOK UP THE LATEST PRE-BUILT AMI
-# This repo contains a CircleCI job that automatically builds and publishes the latest AMI by building the Packer
-# template at /examples/consul-ami upon every new release. The Terraform data source below automatically looks up the
-# latest AMI so that a simple "terraform apply" will just work without the user needing to manually build an AMI and
-# fill in the right value.
-#
-# !! WARNING !! These exmaple AMIs are meant only convenience when initially testing this repo. Do NOT use these example
-# AMIs in a production setting because it is important that you consciously think through the configuration you want
-# in your own production AMI.
-#
-# NOTE: This Terraform data source must return at least one AMI result or the entire template will fail. See
-# /_ci/publish-amis-in-new-account.md for more information.
-# ---------------------------------------------------------------------------------------------------------------------
-data "aws_ami" "consul" {
-  most_recent = true
-
-  # If we change the AWS Account in which test are run, update this value.
-  owners = ["562637147889"]
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  filter {
-    name   = "is-public"
-    values = ["true"]
-  }
-
-  filter {
-    name   = "name"
-    values = ["consul-ubuntu-*"]
-  }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -60,14 +24,14 @@ module "consul_servers" {
 
   cluster_name  = "${var.cluster_name}-server"
   cluster_size  = "${var.num_servers}"
-  instance_type = "t3.micro"
+  instance_type = "t2.micro"
   spot_price    = "${var.spot_price}"
 
   # The EC2 Instances will use these tags to automatically discover each other and form a cluster
   cluster_tag_key   = "${var.cluster_tag_key}"
   cluster_tag_value = "${var.cluster_name}"
 
-  ami_id    = "${var.ami_id == "" ? data.aws_ami.consul.image_id : var.ami_id}"
+  ami_id    = "${var.ami_id}"
   user_data = "${data.template_file.user_data_server.rendered}"
 
   vpc_id     = "${data.aws_vpc.default.id}"
@@ -95,11 +59,17 @@ module "consul_servers" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 data "template_file" "user_data_server" {
-  template = "${file("${path.module}/examples/root-example/user-data-server.sh")}"
+  template = "${file("${path.module}/scripts/user-data-server.sh")}"
 
   vars {
-    cluster_tag_key   = "${var.cluster_tag_key}"
-    cluster_tag_value = "${var.cluster_name}"
+    cluster_tag_key          = "${var.cluster_tag_key}"
+    cluster_tag_value        = "${var.cluster_name}"
+    enable_gossip_encryption = "${var.enable_gossip_encryption}"
+    gossip_encryption_key    = "${var.gossip_encryption_key}"
+    enable_rpc_encryption    = "${var.enable_rpc_encryption}"
+    ca_path                  = "${var.ca_path}"
+    cert_file_path           = "${var.cert_file_path}"
+    key_file_path            = "${var.key_file_path}"
   }
 }
 
@@ -124,7 +94,7 @@ module "consul_clients" {
   cluster_tag_key   = "consul-clients"
   cluster_tag_value = "${var.cluster_name}"
 
-  ami_id    = "${var.ami_id == "" ? data.aws_ami.consul.image_id : var.ami_id}"
+  ami_id    = "${var.ami_id}"
   user_data = "${data.template_file.user_data_client.rendered}"
 
   vpc_id     = "${data.aws_vpc.default.id}"
@@ -144,11 +114,17 @@ module "consul_clients" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 data "template_file" "user_data_client" {
-  template = "${file("${path.module}/examples/root-example/user-data-client.sh")}"
+  template = "${file("${path.module}/scripts/user-data-client.sh")}"
 
   vars {
-    cluster_tag_key   = "${var.cluster_tag_key}"
-    cluster_tag_value = "${var.cluster_name}"
+    cluster_tag_key          = "${var.cluster_tag_key}"
+    cluster_tag_value        = "${var.cluster_name}"
+    enable_gossip_encryption = "${var.enable_gossip_encryption}"
+    gossip_encryption_key    = "${var.gossip_encryption_key}"
+    enable_rpc_encryption    = "${var.enable_rpc_encryption}"
+    ca_path                  = "${var.ca_path}"
+    cert_file_path           = "${var.cert_file_path}"
+    key_file_path            = "${var.key_file_path}"
   }
 }
 

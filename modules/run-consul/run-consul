@@ -311,10 +311,15 @@ EOF
   $gossip_encryption_configuration
   $rpc_encryption_configuration
   $autopilot_configuration
-  "acl_datacenter": "$datacenter",
-  "acl_default_policy": "deny",
-  "acl_down_policy": "extend-cache",
-  "acl_token": "$consul_acl_token",
+  "acl": {
+    "enabled": "true",
+    "default_policy": "deny",
+    "down_policy": "extend-cache",
+    "tokens": {
+      "agent": "$consul_acl_token"
+    }
+  },
+  "primary_datacenter": "$datacenter",
   "ui": $ui
 }
 EOF
@@ -333,9 +338,12 @@ else
   $gossip_encryption_configuration
   $rpc_encryption_configuration
   $autopilot_configuration
-  "acl_datacenter": "$datacenter",
-  "acl_default_policy": "deny",
-  "acl_down_policy": "extend-cache",
+  "acl": {
+    "enabled": "true",
+    "default_policy": "deny",
+    "down_policy": "extend-cache"
+  },
+  "primary_datacenter": "$datacenter",
   "ui": $ui
 }
 EOF

@@ -22,6 +22,12 @@ variable "cluster_name" {
   default     = "consul-example"
 }
 
+variable "environment" {
+  description = "The environment tag to add to the clients/servers in AWS."
+  default = "Development"
+  type = string
+}
+
 variable "num_servers" {
   description = "The number of Consul server nodes to deploy. We strongly recommend using 3 or 5."
   default     = 3
@@ -29,7 +35,17 @@ variable "num_servers" {
 
 variable "num_clients" {
   description = "The number of Consul client nodes to deploy. You typically run the Consul client alongside your apps, so set this value to however many Instances make sense for your app code."
-  default     = 3
+  default     = 0
+}
+
+variable "server_instance_type" {
+  description = "The AWS EC2 Instance type to use for the servers."
+  default = "t3a.small"
+}
+
+variable "client_instance_type" {
+  description = "The AWS EC2 Instance type to use for the clients."
+  default = "t3a.small"
 }
 
 variable "cluster_tag_key" {

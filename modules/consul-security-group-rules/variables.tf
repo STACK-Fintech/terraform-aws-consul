@@ -53,6 +53,17 @@ variable "http_api_port" {
   default     = 8500
 }
 
+variable "https_api_port" {
+  description = "The port used by clients to talk to the HTTPS API"
+  default     = 8501
+}
+
+
+variable "grpc_port" {
+  description = "The port used by Consul Connect and other GRPC-enabled clients"
+  default     = 8502
+}
+
 variable "dns_port" {
   description = "The port used to resolve DNS queries."
   default     = 8600
